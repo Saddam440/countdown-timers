@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Countdown Timer</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    .countdown-section {
+      background-color: #f5a623;
+      color: white;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 3px solid #0056FF;
+      border-radius: 10px;
+      width: fit-content;
+      margin: 20px auto;
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      font-size: 20px;
+      color: black;
+      cursor: pointer;
+    }
+    .learn-more-btn {
+      background-color: #0056FF;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+    .countdown {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 5px;
+      border-radius: 13px;
+      background-color: #F5A623;
+    }
+    .time-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0 5px;
+      font-weight: bold;
+    }
+    .time-number-wrapper {
+      display: flex;
+    }
+    .time-number {
+      font-size: 18px;
+      background-color: #FFE08C;
+      padding: 5px 10px;
+      margin: 0 2px;
+      border-radius: 5px;
+      color: #333;
+    }
+    .time-label {
+      font-size: 10px;
+      margin-top: 5px;
+      color: #333;
+    }
+    .colon {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: -13px;
+      color: #333;
+    }
+    span strong {
+      font-size: 16px;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+<div class="countdown-section" id="countdown-section">
+  <span class="close-btn" onclick="closeBanner()">&times;</span>
+  <a class="learn-more-btn" href="#">Get Started Now</a>
+  <div class="countdown" id="countdown">
+    <div class="time-box">
+      <div class="time-number-wrapper" id="days-wrapper"></div>
+      <div class="time-label">DAYS</div>
+    </div>
+    <div class="colon">:</div>
+    <div class="time-box">
+      <div class="time-number-wrapper" id="hours-wrapper"></div>
+      <div class="time-label">HRS</div>
+    </div>
+    <div class="colon">:</div>
+    <div class="time-box">
+      <div class="time-number-wrapper" id="minutes-wrapper"></div>
+      <div class="time-label">MINS</div>
+    </div>
+    <div class="colon">:</div>
+    <div class="time-box">
+      <div class="time-number-wrapper" id="seconds-wrapper"></div>
+      <div class="time-label">SEC</div>
+    </div>
+  </div>
+  <span style="color:black; font-size: 16px; font-weight: 700;">Expires: <strong>loading...</strong></span>
+</div>
+
+<script>
+function countdownTimer() {
+    let countdownDate = localStorage.getItem('countdownDate');
+    const currentTime = new Date().getTime();
+
+    if (!countdownDate) {
+        const newDate = new Date();
+        newDate.setSeconds(0);
+        countdownDate = newDate.getTime() + (30 * 24 * 60 * 60 * 1000);
+        localStorage.setItem('countdownDate', countdownDate);
+    } else {
+        countdownDate = parseInt(countdownDate, 10);
+    }
+
+    function updateCountdown() {
+        const now = new Date().getTime();
+        const distance = countdownDate - now;
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        displayTime('days-wrapper', String(days).padStart(2, '0'));
+        displayTime('hours-wrapper', String(hours).padStart(2, '0'));
+        displayTime('minutes-wrapper', String(minutes).padStart(2, '0'));
+        displayTime('seconds-wrapper', String(seconds).padStart(2, '0'));
+
+        if (distance < 0) {
+            clearInterval(interval);
+            document.getElementById('countdown').innerHTML = "EXPIRED";
+            localStorage.removeItem('countdownDate');
+        }
+
+        const expiryDate = new Date(countdownDate);
+        const formattedExpiryDate = expiryDate.toLocaleString('en-US', {
+            timeZone: 'America/New_York',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+
+        const timeParts = formattedExpiryDate.split(' ');
+        const timeWithEST = `${timeParts.slice(0, -1).join(' ')} ${timeParts[timeParts.length - 1]} EST`;
+
+        document.querySelector('span strong').textContent = timeWithEST;
+    }
+
+    function displayTime(elementId, timeString) {
+        const element = document.getElementById(elementId);
+        element.innerHTML = '';
+        for (let char of timeString) {
+            const span = document.createElement('div');
+            span.className = 'time-number';
+            span.innerText = char;
+            element.appendChild(span);
+        }
+    }
+
+    const interval = setInterval(updateCountdown, 1000);
+}
+
+function closeBanner() {
+    document.getElementById('countdown-section').style.display = 'none';
+}
+
+countdownTimer();
+</script>
+
+</body>
+</html>
